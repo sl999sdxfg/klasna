@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from sqlmodel import Field, Session, SQLModel, create_engine
+from sqlmodel import Field, Session, SQLModel, create_engine, select
 from datetime import date
 from contextlib import asynccontextmanager
 
@@ -41,3 +41,16 @@ def create_student(student: StudentCreate, session: Session = Depends(get_sessio
     session.refresh(student)
     print(student)
     return student
+
+
+@app.get("/students/{id}")
+def get_student(id: int, session: Session = Depends(get_session)):
+    student: Student = session.get(entity=Student, ident=id)
+    return student
+
+
+@app.get("/students/")
+def get_all_students(session: Session = Depends(get_session)):
+    selection = select(Student)
+    students: list[Student] = session.exec(selection).all()
+    return students
