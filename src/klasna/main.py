@@ -1,6 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from sqlmodel import Field, Session, SQLModel, create_engine
-from typing import Optional
 from datetime import date
 from contextlib import asynccontextmanager
 
@@ -8,7 +7,13 @@ engine = create_engine("sqlite:///database.db")
 
 
 class Student(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    surname: str
+    birthday: date
+
+
+class StudentCreate(SQLModel):
     name: str
     surname: str
     birthday: date
@@ -26,3 +31,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.post("/students/")
+def create_student(student: StudentCreate, session: Session = Depends(get_session)):
+    student = Student.model_validate(student)
+    session.add(student)
+    session.commit()
+    session.refresh(student)
+    print(student)
+    return student
