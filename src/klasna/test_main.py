@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from main import app, get_session
+from .main import app, get_session
 from sqlmodel import create_engine, Session, SQLModel
 from sqlalchemy.pool import StaticPool
 
@@ -15,6 +15,23 @@ def get_test_session():
         yield session
 
 
+SQLModel.metadata.create_all(test_engine)
+
 app.dependency_overrides[get_session] = get_test_session
 client = TestClient(app)
-SQLModel.metadata.create_all(test_engine)
+
+baseurl = "http://127.0.0.1"
+student_endpoint = baseurl + "/students/"
+
+
+def test_student_creation():
+    student_ivan = {"name": "Ivan", "surname": "Bratkovskyi", "birthday": "2012-01-11"}
+    post_result: dict = client.post(
+        student_endpoint,
+        json=student_ivan,
+    ).json()
+
+    assert student_ivan.items() <= post_result.items()
+    assert post_result["id"] is not None
+    assert isinstance(post_result["id"], int)
+    assert post_result["id"] >= 0
