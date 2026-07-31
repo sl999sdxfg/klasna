@@ -35,3 +35,29 @@ def test_student_creation():
     assert post_result["id"] is not None
     assert isinstance(post_result["id"], int)
     assert post_result["id"] >= 0
+
+
+def test_student_get():
+    student_ivan = {"name": "Ivan", "surname": "Bratkovskyi", "birthday": "2012-01-11"}
+    post_result: dict = client.post(
+        student_endpoint,
+        json=student_ivan,
+    ).json()
+    print(post_result)
+    get_result: dict = client.get(f"{student_endpoint}{post_result["id"]}").json()
+    assert get_result.items() == post_result.items()
+    assert get_result["id"] is not None
+    assert isinstance(post_result["id"], int)
+    assert get_result["id"] >= 0
+
+
+def test_student_delete():
+    return
+
+
+def test_student_update():
+    return
+
+
+def test_all_students_get():
+    return
