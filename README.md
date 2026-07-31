@@ -3,4 +3,7 @@
 ```bash
 # run app
 uv run fastapi dev main.py
+
+# test app
+uv run pytest
 ```
