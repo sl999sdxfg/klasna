@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from datetime import date
 from contextlib import asynccontextmanager
@@ -34,23 +34,42 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.post("/students/")
-def create_student(student: StudentCreate, session: Session = Depends(get_session)):
-    student = Student.model_validate(student)
+def create_student(
+    student: StudentCreate, session: Session = Depends(get_session)
+) -> Student:
+    db_student = Student.model_validate(student)
     session.add(student)
     session.commit()
     session.refresh(student)
     print(student)
-    return student
+    return db_student
+
+
+def get_or_404[T: SQLModel](
+    model: type[T], id: int, session: Session = Depends(get_session)
+) -> T:
+    obj = session.get(model, id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail=f"no {model.__name__} with id={id}")
+    return obj
 
 
 @app.get("/students/{id}")
-def get_student(id: int, session: Session = Depends(get_session)):
-    student: Student = session.get(entity=Student, ident=id)
+def get_student(id: int, session: Session = Depends(get_session)) -> Student:
+    student: Student = get_or_404(Student, id, session)
     return student
 
 
 @app.get("/students/")
-def get_all_students(session: Session = Depends(get_session)):
+def get_all_students(session: Session = Depends(get_session)) -> list[Student]:
     selection = select(Student)
     students: list[Student] = session.exec(selection).all()
     return students
+
+
+@app.delete("/students/{id}")
+def delete_student(id: int, session: Session = Depends(get_session)) -> Student:
+    student: Student = get_or_404(Student, id, session)
+    session.delete(student)
+    session.commit()
+    return student
