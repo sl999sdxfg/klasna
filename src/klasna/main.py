@@ -38,17 +38,14 @@ def create_student(
     student: StudentCreate, session: Session = Depends(get_session)
 ) -> Student:
     db_student = Student.model_validate(student)
-    session.add(student)
+    session.add(db_student)
     session.commit()
-    session.refresh(student)
-    print(student)
+    session.refresh(db_student)
     return db_student
 
 
-def get_or_404[T: SQLModel](
-    model: type[T], id: int, session: Session = Depends(get_session)
-) -> T:
-    obj = session.get(model, id)
+def get_or_404[T: SQLModel](model: type[T], id: int, session: Session) -> T:
+    obj: T | None = session.get(model, id)
     if obj is None:
         raise HTTPException(status_code=404, detail=f"no {model.__name__} with id={id}")
     return obj
