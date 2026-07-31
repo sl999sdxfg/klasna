@@ -19,6 +19,12 @@ class StudentCreate(SQLModel):
     birthday: date
 
 
+class StudentUpdate(SQLModel):
+    name: str | None = None
+    surname: str | None = None
+    birthday: date | None = None
+
+
 def get_session():
     with Session(engine) as session:
         yield session
@@ -70,3 +76,19 @@ def delete_student(id: int, session: Session = Depends(get_session)) -> Student:
     session.delete(student)
     session.commit()
     return student
+
+
+@app.patch("/students/{id}")
+def update_student(
+    id: int, student: StudentUpdate, session: Session = Depends(get_session)
+) -> Student:
+    db_student: Student = get_or_404(Student, id, session)
+    update_data = student.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_student, key, value)
+    session.add(db_student)
+    session.commit()
+    print(db_student)
+    session.refresh(db_student)
+    print(db_student)
+    return db_student
