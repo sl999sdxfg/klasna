@@ -1,9 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from datetime import date
+from .database import engine, get_session
 from contextlib import asynccontextmanager
-
-engine = create_engine("sqlite:///database.db")
 
 
 class Student(SQLModel, table=True):
@@ -23,11 +22,6 @@ class StudentUpdate(SQLModel):
     name: str | None = None
     surname: str | None = None
     birthday: date | None = None
-
-
-def get_session():
-    with Session(engine) as session:
-        yield session
 
 
 @asynccontextmanager
