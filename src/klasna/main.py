@@ -1,27 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
-from sqlmodel import Field, Session, SQLModel, create_engine, select
-from datetime import date
+from sqlmodel import Session, SQLModel, select
 from .database import engine, get_session
+from .models import Student, StudentCreate, StudentUpdate
 from contextlib import asynccontextmanager
-
-
-class Student(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str
-    surname: str
-    birthday: date
-
-
-class StudentCreate(SQLModel):
-    name: str
-    surname: str
-    birthday: date
-
-
-class StudentUpdate(SQLModel):
-    name: str | None = None
-    surname: str | None = None
-    birthday: date | None = None
 
 
 @asynccontextmanager
