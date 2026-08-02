@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 from ..database import get_session
-from ..models import Parent, ParentCreate, ParentUpdate
+from ..models import Parent, ParentCreate
 from ..utils import get_or_404
 
 router = APIRouter(prefix="/parents", tags=["parents"])
@@ -26,14 +26,14 @@ def create_parent(
 
 @router.get("/")
 def get_all_parents(session: Session = Depends(get_session)) -> list[Parent]:
-    selection = select(parent)
+    selection = select(Parent)
     parents: list[Parent] = session.exec(selection).all()
     return parents
 
 
 @router.delete("/{id}")
 def delete_parent(id: int, session: Session = Depends(get_session)) -> Parent:
-    parent: Parent = get_or_404(Student, id, session)
+    parent: Parent = get_or_404(Parent, id, session)
     session.delete(parent)
     session.commit()
     return parent

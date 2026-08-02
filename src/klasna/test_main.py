@@ -26,12 +26,26 @@ client = TestClient(app)
 
 baseurl = "http://127.0.0.1"
 student_endpoint = baseurl + "/students/"
+parent_endpoint = baseurl + "/parents/"
 
 
 @pytest.fixture
 def created_student():
     student_data = {"name": "Ivan", "surname": "Bratkovskyi", "birthday": "2012-01-11"}
     response = client.post(student_endpoint, json=student_data)
+    return response.json()
+
+
+@pytest.fixture
+def created_parent():
+    parent_data = {
+        "name": "Stepan",
+        "surname": "Bratkovskyi",
+        "birthday": "1991-03-04",
+        "phone": "+380773147189",
+        "email": "stepanbb@gmail.com",
+    }
+    response = client.post(parent_endpoint, json=parent_data)
     return response.json()
 
 
@@ -102,3 +116,53 @@ def test_all_students_get():
     expected = [s.model_dump(mode="json") for s in all_students_in_db]
 
     assert response.json() == expected
+
+
+def test_parent_creation():
+    parent_data = {
+        "name": "Stepan",
+        "surname": "Bratkovskyi",
+        "birthday": "1991-03-04",
+        "phone": "+380773147189",
+        "email": "stepanbb@gmail.com",
+    }
+    post_result = client.post(parent_endpoint, json=parent_data).json()
+
+    assert parent_data.items() <= post_result.items()
+    assert post_result["id"] is not None
+    assert isinstance(post_result["id"], int)
+    assert post_result["id"] >= 0
+
+
+def test_parent_get():
+    parent_data = {
+        "name": "Stepan",
+        "surname": "Bratkovskyi",
+        "birthday": "1991-03-04",
+        "phone": "+380773147189",
+        "email": "stepanbb@gmail.com",
+    }
+    post_result: dict = client.post(
+        parent_endpoint,
+        json=parent_data,
+    ).json()
+    get_result: dict = client.get(f"{parent_endpoint}{post_result["id"]}").json()
+    assert get_result.items() == post_result.items()
+    assert get_result["id"] is not None
+    assert isinstance(post_result["id"], int)
+    assert get_result["id"] >= 0
+
+
+def test_parent_get_404():
+    non_existing_id = 999_999_999
+    get_response: dict = client.get(f"{parent_endpoint}{non_existing_id}")
+    assert get_response.status_code == status.HTTP_404_NOT_FOUND
+    content = f'{{"detail":"no Parent with id={non_existing_id}"}}'
+    content = content.encode("utf-8")
+    assert get_response.content == content
+
+
+def test_parent_delete(created_parent):
+    url = f"{parent_endpoint}{created_parent["id"]}"
+    client.delete(url)
+    assert client.get(url).status_code == status.HTTP_404_NOT_FOUND
