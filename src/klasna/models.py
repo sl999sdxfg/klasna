@@ -35,6 +35,14 @@ class StudentUpdate(SQLModel):
     birthday: date | None = None
 
 
+class StudentWithParents(SQLModel):
+    id: int
+    name: str
+    surname: str
+    birthday: date
+    parents: list["Parent"] = []
+
+
 class Parent(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
