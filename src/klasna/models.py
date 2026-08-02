@@ -8,6 +8,11 @@ class StudentParentLink(SQLModel, table=True):
     student_id: int = Field(foreign_key="student.id")
 
 
+class StudentParentLinkCreate(SQLModel):
+    parent_id: int
+    student_id: int
+
+
 class Student(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
