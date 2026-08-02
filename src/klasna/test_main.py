@@ -1,11 +1,11 @@
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from .main import app, get_session, Student
+from .database import get_session
+from .main import app
+from .models import Student
 from sqlmodel import create_engine, select, Session, SQLModel
 from sqlalchemy.pool import StaticPool
-from typing import List
-from pydantic import TypeAdapter
 
 test_engine = create_engine(
     "sqlite:///:memory:",
