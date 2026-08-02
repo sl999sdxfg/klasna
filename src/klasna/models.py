@@ -44,3 +44,9 @@ class ParentUpdate(SQLModel):
     birthday: date | None = None
     phone: str | None = None
     email: str | None = None
+
+
+class StudentParentLink(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    parent_id: int = Field(foreign_key="parent.id")
+    student_id: int = Field(foreign_key="student.id")
