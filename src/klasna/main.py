@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends
 from sqlmodel import Session, SQLModel, select
 from .database import engine, get_session
 from .models import Student, StudentCreate, StudentUpdate
-from contextlib import asynccontextmanager
+from .utils import get_or_404
 
 
 @asynccontextmanager
@@ -23,13 +24,6 @@ def create_student(
     session.commit()
     session.refresh(db_student)
     return db_student
-
-
-def get_or_404[T: SQLModel](model: type[T], id: int, session: Session) -> T:
-    obj: T | None = session.get(model, id)
-    if obj is None:
-        raise HTTPException(status_code=404, detail=f"no {model.__name__} with id={id}")
-    return obj
 
 
 @app.get("/students/{id}")
