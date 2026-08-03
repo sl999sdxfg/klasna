@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 from ..database import get_session
-from ..models import Student, StudentCreate, StudentUpdate
+from ..models import Student, StudentCreate, StudentUpdate, StudentWithParents
 from ..utils import get_or_404
 
 router = APIRouter(prefix="/students", tags=["students"])
 
 
 @router.get("/{id}")
-def get_student(id: int, session: Session = Depends(get_session)) -> Student:
+def get_student(id: int, session: Session = Depends(get_session)) -> StudentWithParents:
     student: Student = get_or_404(Student, id, session)
     return student
 

@@ -44,6 +44,7 @@ def created_parent():
         "birthday": "1991-03-04",
         "phone": "+380773147189",
         "email": "stepanbb@gmail.com",
+        "students": [],
     }
     response = client.post(parent_endpoint, json=parent_data)
     return response.json()
@@ -63,14 +64,19 @@ def test_student_creation():
 
 
 def test_student_get():
-    student_data = {"name": "Ivan", "surname": "Bratkovskyi", "birthday": "2012-01-11"}
+    student_data = {
+        "name": "Ivan",
+        "surname": "Bratkovskyi",
+        "birthday": "2012-01-11",
+    }
     post_result: dict = client.post(
         student_endpoint,
         json=student_data,
     ).json()
     get_result: dict = client.get(f"{student_endpoint}{post_result["id"]}").json()
-    assert get_result.items() == post_result.items()
+    assert post_result.items() <= get_result.items()
     assert get_result["id"] is not None
+    assert get_result["parents"] == []
     assert isinstance(post_result["id"], int)
     assert get_result["id"] >= 0
 
@@ -147,8 +153,9 @@ def test_parent_get():
         json=parent_data,
     ).json()
     get_result: dict = client.get(f"{parent_endpoint}{post_result["id"]}").json()
-    assert get_result.items() == post_result.items()
+    assert post_result.items() <= get_result.items()
     assert get_result["id"] is not None
+    assert get_result["students"] == []
     assert isinstance(post_result["id"], int)
     assert get_result["id"] >= 0
 

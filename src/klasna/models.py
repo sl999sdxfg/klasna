@@ -69,3 +69,13 @@ class ParentUpdate(SQLModel):
     birthday: date | None = None
     phone: str | None = None
     email: str | None = None
+
+
+class ParentWithStudents(SQLModel):
+    id: int
+    name: str
+    surname: str
+    birthday: date
+    phone: str
+    email: str
+    students: list[Student] = []
