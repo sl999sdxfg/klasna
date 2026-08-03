@@ -3,7 +3,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from .database import get_session
 from .main import app
-from .models import Student
+from .models import Student, StudentParentLink, Parent
 from sqlmodel import create_engine, select, Session, SQLModel
 from sqlalchemy.pool import StaticPool
 
@@ -166,3 +166,12 @@ def test_parent_delete(created_parent):
     url = f"{parent_endpoint}{created_parent["id"]}"
     client.delete(url)
     assert client.get(url).status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_student_parent_link(created_student, created_parent):
+    student_id = created_student["id"]
+    parent_id = created_parent["id"]
+    print(created_parent)
+    post_response = client.post(f"{baseurl}/students/{student_id}/parents/{parent_id}")
+    assert post_response.status_code == status.HTTP_200_OK
+    assert created_parent in post_response.json()["parents"]
