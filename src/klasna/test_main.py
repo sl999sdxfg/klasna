@@ -27,6 +27,7 @@ client = TestClient(app)
 baseurl = "http://127.0.0.1"
 student_endpoint = baseurl + "/students/"
 parent_endpoint = baseurl + "/parents/"
+teacher_endpoint = baseurl + "/teachers/"
 
 
 @pytest.fixture
@@ -47,6 +48,21 @@ def created_parent():
         "students": [],
     }
     response = client.post(parent_endpoint, json=parent_data)
+    return response.json()
+
+
+@pytest.fixture
+def created_teacher():
+    teacher_data = {
+        "name": "Panas",
+        "surname": "Semerchenko",
+        "birthday": "1988-08-14",
+        "phone": "+380773147189",
+        "email": "stepanbb@gmail.com",
+        "subjects": "math, computer science",
+        "classes": "2, 3, 4, 5, 8, 9",
+    }
+    response = client.post(teacher_endpoint, json=teacher_data)
     return response.json()
 
 
@@ -195,8 +211,9 @@ def test_student_parent_unlink(created_student, created_parent):
         f"{baseurl}/students/{student_id}/parents/{parent_id}"
     )
 
+    get_response = client.get(f"{baseurl}/students/{student_id}/")
     assert delete_response.status_code == status.HTTP_200_OK
-    assert created_parent in post_response.json()["parents"]
+    assert created_parent not in get_response.json()["parents"]
     delete_response = client.delete(
         f"{baseurl}/students/{student_id}/parents/{parent_id}"
     )
@@ -217,3 +234,45 @@ def test_student_parent_unlink(created_student, created_parent):
         f"{baseurl}/students/{999_999_999}/parents/{999_999_999}"
     )
     assert delete_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_create_teacher():
+    teacher_data = {
+        "name": "Panas",
+        "surname": "Semerchenko",
+        "birthday": "1988-08-14",
+        "phone": "+380773147189",
+        "email": "stepanbb@gmail.com",
+        "subjects": "math, computer science",
+        "classes": "2, 3, 4, 5, 8, 9",
+    }
+    post_response = client.post(teacher_endpoint, json=teacher_data)
+    assert post_response.status_code == status.HTTP_200_OK
+    assert teacher_data.items() <= post_response.json().items()
+    assert post_response.json()["id"] is not None
+    assert isinstance(post_response.json()["id"], int)
+    assert post_response.json()["id"] > 0
+
+
+def test_teacher_get(created_teacher):
+    teacher_id = created_teacher["id"]
+    get_result: dict = client.get(f"{teacher_endpoint}{teacher_id}").json()
+    assert created_teacher.items() <= get_result.items()
+    assert get_result["id"] is not None
+    assert isinstance(get_result["id"], int)
+    assert get_result["id"] >= 0
+
+
+def test_teacher_get_404():
+    non_existing_id = 999_999_999
+    get_response: dict = client.get(f"{teacher_endpoint}{non_existing_id}")
+    assert get_response.status_code == status.HTTP_404_NOT_FOUND
+    content = f'{{"detail":"no Teacher with id={non_existing_id}"}}'
+    content = content.encode("utf-8")
+    assert get_response.content == content
+
+
+def test_teacher_delete(created_teacher):
+    url = f"{teacher_endpoint}{created_teacher["id"]}"
+    client.delete(url)
+    assert client.get(url).status_code == status.HTTP_404_NOT_FOUND

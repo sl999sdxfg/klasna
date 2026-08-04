@@ -79,3 +79,27 @@ class ParentWithStudents(SQLModel):
     phone: str
     email: str
     students: list[Student] = []
+
+
+class Teacher(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    surname: str
+    birthday: date
+    phone: str | None = None
+    email: str | None = None
+    subjects: str
+    classes: str
+    # list["Subject"] = Relationship(
+    #     back_populates="subject", link_model=TeacherSubjectLink
+    # )
+
+
+class TeacherCreate(SQLModel):
+    name: str
+    surname: str
+    birthday: date
+    phone: str | None = None
+    email: str | None = None
+    subjects: str
+    classes: str
