@@ -23,14 +23,22 @@ def link_student_parent(
 def unlink_student_parent(
     student_id: int, parent_id: int, session: Session = Depends(get_session)
 ) -> StudentWithParents:
-    db_student = get_or_404(StudentWithParents, student_id, session)
+    db_student = get_or_404(Student, student_id, session)
     # to ensure parent exists but should work anyway if no bugs
     db_parent = get_or_404(Parent, parent_id, session)
-    if db_parent not in db_student["parents"]:
-        return HTTPException(
+    if db_parent not in db_student.parents:
+        raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="object do not relate"
         )
 
-    session.add(student_parent_link)
+    statement = select(StudentParentLink).where(
+        StudentParentLink.student_id == student_id,
+        StudentParentLink.parent_id == parent_id,
+    )
+    link = session.exec(statement).first()
+    if link is None:
+        raise HTTPException(status_code=404, detail="link not found")
+    print(link)
+    session.delete(link)
     session.commit()
     return get_or_404(Student, student_id, session)
