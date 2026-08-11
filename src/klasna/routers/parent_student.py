@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+
 from ..database import get_session
-from ..models import Student, Parent, StudentParentLink, StudentWithParents
+from ..models import Parent, Student, StudentParentLink, StudentWithParents
 from ..utils import get_or_404
 
 router = APIRouter()
@@ -13,6 +14,11 @@ def link_student_parent(
 ) -> StudentWithParents:
     db_student = get_or_404(Student, student_id, session)
     db_parent = get_or_404(Parent, parent_id, session)
+    # Prevent duplicate links
+    if db_parent in db_student.parents:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="already linked"
+        )
     student_parent_link = StudentParentLink(student_id=student_id, parent_id=parent_id)
     session.add(student_parent_link)
     session.commit()
@@ -38,7 +44,6 @@ def unlink_student_parent(
     link = session.exec(statement).first()
     if link is None:
         raise HTTPException(status_code=404, detail="link not found")
-    print(link)
     session.delete(link)
     session.commit()
     return get_or_404(Student, student_id, session)

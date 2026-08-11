@@ -1,5 +1,16 @@
 from datetime import date
+
 from sqlmodel import Field, Relationship, SQLModel
+
+
+class Class(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    grade: int
+    section: str
+    school_year_id: int
+    homeroom_teacher_id: int | None = None
+
+    students: list["Student"] = Relationship(back_populates="class_")
 
 
 class StudentParentLink(SQLModel, table=True):
@@ -22,6 +33,9 @@ class Student(SQLModel, table=True):
         back_populates="students", link_model=StudentParentLink
     )
 
+    class_id: int | None = Field(default=None, foreign_key="class.id")
+    class_: Class | None = Relationship(back_populates="students")
+
 
 class StudentCreate(SQLModel):
     name: str
@@ -40,7 +54,7 @@ class StudentWithParents(SQLModel):
     name: str
     surname: str
     birthday: date
-    parents: list["Parent"] = []
+    parents: list["Parent"] = Field(default_factory=list)
 
 
 class Parent(SQLModel, table=True):
@@ -78,7 +92,7 @@ class ParentWithStudents(SQLModel):
     birthday: date
     phone: str
     email: str
-    students: list[Student] = []
+    students: list[Student] = Field(default_factory=list)
 
 
 class Teacher(SQLModel, table=True):
@@ -103,3 +117,17 @@ class TeacherCreate(SQLModel):
     email: str | None = None
     subjects: str
     classes: str
+
+
+class ClassCreate(SQLModel):
+    grade: int
+    section: str
+    school_year_id: int
+    homeroom_teacher_id: int | None = None
+
+
+class ClassWithStudents(SQLModel):
+    grade: int
+    section: str
+    school_year_id: int
+    homeroom_teacher_id: int | None = None

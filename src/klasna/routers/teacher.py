@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
+
 from ..database import get_session
 from ..models import Teacher, TeacherCreate
 from ..utils import get_or_404
@@ -8,7 +9,7 @@ router = APIRouter(prefix="/teachers", tags=["teachers"])
 
 
 @router.get("/{id}")
-def get_student(id: int, session: Session = Depends(get_session)) -> Teacher:
+def get_teacher(id: int, session: Session = Depends(get_session)) -> Teacher:
     teacher: Teacher = get_or_404(Teacher, id, session)
     return teacher
 

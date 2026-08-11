@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
+
 from ..database import get_session
 from ..models import Student, StudentCreate, StudentUpdate, StudentWithParents
 from ..utils import get_or_404
@@ -49,7 +50,5 @@ def update_student(
         setattr(db_student, key, value)
     session.add(db_student)
     session.commit()
-    print(db_student)
     session.refresh(db_student)
-    print(db_student)
     return db_student
