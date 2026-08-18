@@ -1,27 +1,29 @@
 from fastapi import status
 
 from .conftest import Endpoints
-from .utils import check_identical_except_id, sample_parent
+from .test_helpers import (
+    assert_created_matches_input,
+    assert_has_valid_id,
+)
+from .utils import parent_data
 
 
 def test_parent_creation(client):
-    parent_data = sample_parent()
-    post_result = client.post(Endpoints.PARENTS, json=parent_data).json()
-    check_identical_except_id(post_result)
+    parent_data_ = parent_data()
+    post_result = client.post(Endpoints.PARENTS, json=parent_data_).json()
+    assert_created_matches_input(parent_data_, post_result)
 
 
 def test_parent_get(client):
-    parent_data = sample_parent()
+    parent_data_ = parent_data()
     post_result: dict = client.post(
         Endpoints.PARENTS,
-        json=parent_data,
+        json=parent_data_,
     ).json()
     get_result: dict = client.get(f"{Endpoints.PARENTS}{post_result['id']}").json()
     assert post_result.items() <= get_result.items()
-    assert get_result["id"] is not None
     assert get_result["students"] == []
-    assert isinstance(post_result["id"], int)
-    assert get_result["id"] >= 0
+    assert_has_valid_id(post_result)
 
 
 def test_parent_get_404(client):

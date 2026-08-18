@@ -3,22 +3,27 @@ from sqlmodel import Session, select
 
 from ..models import Student
 from .conftest import Endpoints, test_engine
-from .utils import check_identical_except_id, sample_student
+from .test_helpers import (
+    assert_created_matches_input,
+    assert_has_valid_id,
+)
+from .utils import student_data
 
 
 def test_student_creation(client):
-    student_data = sample_student()
+    student_data_ = student_data()
     post_result = client.post(
         Endpoints.STUDENTS,
-        json=student_data,
+        json=student_data_,
     ).json()
-    check_identical_except_id(student_no_id=student_data, student_with_id=post_result)
+    assert_has_valid_id(post_result)
+    assert_created_matches_input(student_data_, post_result)
 
 
 def test_student_retreival(client, created_student):
     get_result = client.post(Endpoints.STUDENTS, json=created_student).json()
     no_id = {k: v for k, v in created_student.items() if k != "id"}
-    check_identical_except_id(student_no_id=no_id, student_with_id=get_result)
+    assert_created_matches_input(no_id, get_result)
 
 
 def test_student_retreival_404(client):
@@ -52,6 +57,4 @@ def test_student_update(client, created_student):
         "birthday": "2012-01-11",
     }
     post_result = client.patch(url=url, json=updated_student_data).json()
-    check_identical_except_id(
-        student_no_id=updated_student_data, student_with_id=post_result
-    )
+    assert_created_matches_input(updated_student_data, post_result)
