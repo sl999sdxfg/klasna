@@ -30,8 +30,7 @@ def test_student_retreival_404(client):
     non_existing_id = 999_999_999
     get_response = client.get(f"{Endpoints.STUDENTS}{non_existing_id}")
     assert get_response.status_code == status.HTTP_404_NOT_FOUND
-    content = f'{{"detail":"no Student with id={non_existing_id}"}}'.encode()
-    assert get_response.content == content
+    assert get_response.json()["detail"] == f"no Student with id={non_existing_id}"
 
 
 def test_student_delete(client, created_student):
