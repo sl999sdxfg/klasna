@@ -1,10 +1,17 @@
 from datetime import date
+from enum import StrEnum, auto
 
+from pydantic import model_validator
 from sqlmodel import Field, Relationship, SQLModel
 
 
+class Subject(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+
+
 class Class(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     grade: int
     section: str
     school_year_id: int
@@ -131,3 +138,53 @@ class ClassWithStudents(SQLModel):
     section: str
     school_year_id: int
     homeroom_teacher_id: int | None = None
+
+
+class Lesson(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    subject_id: int = Field(foreign_key="subject.id")
+    class_id: int = Field(foreign_key="class.id")
+    teacher_id: int = Field(foreign_key="teacher.id")
+    date: date
+
+
+class AttendanceStatus(StrEnum):
+    ABSENT = auto()
+    SICK = auto()
+    VALID_REASON = auto()
+
+
+class Grade(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: int = Field(foreign_key="student.id")
+    lesson_id: int = Field(foreign_key="lesson.id")
+    score: int | None = None
+    status: AttendanceStatus | None = None
+
+    @model_validator(mode="after")
+    def grade_validate(self) -> "Grade":
+        if self.score is not None and (self.score < 1 or self.score > 12):
+            raise ValueError("Grade should be in range 1-12")
+        return self
+
+    @model_validator(mode="after")
+    def grade_and_status_not_both_set(self) -> "Grade":
+        if self.score is not None and self.status is not None:
+            raise ValueError(
+                "Grade and attendance status can not be set simultaneously"
+            )
+        return self
+
+
+class GradeCreate(SQLModel):
+    student_id: int
+    lesson_id: int
+    score: int | None = None
+    status: AttendanceStatus | None = None
+
+
+class LessonCreate(SQLModel):
+    subject_id: int
+    class_id: int
+    teacher_id: int
+    date: date
