@@ -27,4 +27,29 @@ build-backend = "uv_build"
 dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
+    "basedpyright",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "ruff",
 ]
+
+# --- TOOL CONFIGURATIONS ---
+
+[tool.basedpyright]
+include = ["src"]
+typeCheckingMode = "recommended"
+pythonPlatform = "All"
+
+[tool.ruff]
+# Target Python version
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+# Enable Pyflakes (F), pycodestyle (E, W), and isort (I)
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=src"
