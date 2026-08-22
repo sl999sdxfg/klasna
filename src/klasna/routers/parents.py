@@ -3,14 +3,14 @@ from sqlmodel import Session
 
 from ..database import get_session
 from ..models import Parent, ParentCreate, ParentWithStudents
-from ..utils import create, delete, get_or_404, list_all
+from ..utils import create, delete, get_or_404, list_all, to_schema
 
 router = APIRouter(prefix="/parents", tags=["parents"])
 
 
 @router.get("/{id}")
 def get_parent(id: int, session: Session = Depends(get_session)) -> ParentWithStudents:
-    return get_or_404(Parent, id, session)
+    return to_schema(ParentWithStudents, get_or_404(Parent, id, session))
 
 
 @router.post("/")

@@ -25,12 +25,15 @@ def list_all[T: SQLModel](session: Session, model: type[T]) -> list[T]:
 
 
 def delete[T: SQLModel](session: Session, obj: T) -> T:
-    session.delete(obj)
+    session.delete(instance=obj)
     session.commit()
     return obj
 
 
 def apply_update[T: SQLModel](session: Session, obj: T, data: SQLModel) -> T:
-    for key, value in data.model_dump(exclude_unset=True).items():
-        setattr(obj, key, value)
+    obj.sqlmodel_update(data)
     return save(session, obj)
+
+
+def to_schema[T: SQLModel](schema: type[T], obj: SQLModel) -> T:
+    return schema.model_validate(obj)

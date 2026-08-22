@@ -1,8 +1,11 @@
+from collections.abc import Generator
+
+from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, create_engine
 
-engine = create_engine("sqlite:///database.db")
+engine: Engine = create_engine("sqlite:///database.db")
 
 
-def get_session():
-    with Session(engine) as session:
+def get_session() -> Generator[Session, None, None]:
+    with Session(bind=engine) as session:
         yield session

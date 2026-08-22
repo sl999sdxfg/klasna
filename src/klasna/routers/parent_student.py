@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from ..database import get_session
 from ..models import Parent, Student, StudentWithParents
-from ..utils import get_or_404, save
+from ..utils import get_or_404, save, to_schema
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ def link_student_parent(
             status_code=status.HTTP_409_CONFLICT, detail="already linked"
         )
     student.parents.append(parent)
-    return save(session, student)
+    return to_schema(StudentWithParents, save(session, student))
 
 
 @router.delete("/students/{student_id}/parents/{parent_id}/")
@@ -33,4 +33,4 @@ def unlink_student_parent(
             status_code=status.HTTP_409_CONFLICT, detail="object do not relate"
         )
     student.parents.remove(parent)
-    return save(session, student)
+    return to_schema(StudentWithParents, save(session, student))

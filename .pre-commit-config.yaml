@@ -13,12 +13,12 @@ repos:
         language: system
         types: [python]
 
-  # 2. Run basedpyright for strict type checking
+  # 2. Run pyright for type checking
   - repo: local
     hooks:
-      - id: basedpyright
-        name: basedpyright
-        entry: uv run basedpyright
+      - id: pyright
+        name: pyright
+        entry: uv run pyright
         language: system
         types: [python]
         pass_filenames: false

@@ -13,41 +13,29 @@ dependencies = [
     "sqlmodel>=0.0.39",
 ]
 
-[project.scripts]
-klasna = "klasna:main"
-
-[tools.uv.scripts]
-dev = "fastapi dev"
-
 [build-system]
 requires = ["uv_build>=0.12.0,<0.13.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pre-commit",
+    "pyright>=1.1.411",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
-    "basedpyright",
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
     "ruff",
 ]
 
-# --- TOOL CONFIGURATIONS ---
-
-[tool.basedpyright]
+[tool.pyright]
 include = ["src"]
-typeCheckingMode = "recommended"
+typeCheckingMode = "strict"
 pythonPlatform = "All"
 
 [tool.ruff]
-# Target Python version
 target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
-# Enable Pyflakes (F), pycodestyle (E, W), and isort (I)
 select = ["E", "F", "W", "I"]
 
 [tool.pytest.ini_options]
