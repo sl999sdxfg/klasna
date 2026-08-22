@@ -4,8 +4,9 @@ from .conftest import Endpoints
 from .test_helpers import (
     assert_created_matches_input,
     assert_has_valid_id,
+    assert_not_found,
 )
-from .utils import teacher_data
+from .utils import MISSING_ID, teacher_data
 
 
 def test_create_teacher(client):
@@ -16,17 +17,15 @@ def test_create_teacher(client):
 
 
 def test_teacher_get(client, created_teacher):
-    teacher_id = created_teacher["id"]
-    get_result = client.get(f"{Endpoints.TEACHERS}{teacher_id}").json()
+    get_result = client.get(f"{Endpoints.TEACHERS}{created_teacher['id']}").json()
     assert created_teacher.items() <= get_result.items()
     assert_has_valid_id(get_result)
 
 
 def test_teacher_get_404(client):
-    non_existing_id = 999_999_999
-    response = client.get(f"{Endpoints.TEACHERS}{non_existing_id}")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json()["detail"] == f"no Teacher with id={non_existing_id}"
+    assert_not_found(
+        client.get(f"{Endpoints.TEACHERS}{MISSING_ID}"), "Teacher", MISSING_ID
+    )
 
 
 def test_teacher_delete(client, created_teacher):

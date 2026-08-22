@@ -31,11 +31,20 @@ class StudentParentLinkCreate(SQLModel):
     student_id: int
 
 
-class Student(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class PersonBase(SQLModel):
     name: str
     surname: str
     birthday: date
+
+
+class PersonUpdate(SQLModel):
+    name: str | None = None
+    surname: str | None = None
+    birthday: date | None = None
+
+
+class Student(PersonBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
     parents: list["Parent"] = Relationship(
         back_populates="students", link_model=StudentParentLink
     )
@@ -44,86 +53,58 @@ class Student(SQLModel, table=True):
     class_: Class | None = Relationship(back_populates="students")
 
 
-class StudentCreate(SQLModel):
-    name: str
-    surname: str
-    birthday: date
+class StudentCreate(PersonBase):
+    pass
 
 
-class StudentUpdate(SQLModel):
-    name: str | None = None
-    surname: str | None = None
-    birthday: date | None = None
+class StudentUpdate(PersonUpdate):
+    pass
 
 
-class StudentWithParents(SQLModel):
+class StudentWithParents(PersonBase):
     id: int
-    name: str
-    surname: str
-    birthday: date
     parents: list["Parent"] = Field(default_factory=list)
 
 
-class Parent(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str
-    surname: str
-    birthday: date
+class ParentBase(PersonBase):
     phone: str
     email: str
+
+
+class Parent(ParentBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
     students: list["Student"] = Relationship(
         back_populates="parents", link_model=StudentParentLink
     )
 
 
-class ParentCreate(SQLModel):
-    name: str
-    surname: str
-    birthday: date
-    phone: str
-    email: str
+class ParentCreate(ParentBase):
+    pass
 
 
-class ParentUpdate(SQLModel):
-    name: str | None = None
-    surname: str | None = None
-    birthday: date | None = None
+class ParentUpdate(PersonUpdate):
     phone: str | None = None
     email: str | None = None
 
 
-class ParentWithStudents(SQLModel):
+class ParentWithStudents(ParentBase):
     id: int
-    name: str
-    surname: str
-    birthday: date
-    phone: str
-    email: str
     students: list[Student] = Field(default_factory=list)
 
 
-class Teacher(SQLModel, table=True):
+class TeacherBase(PersonBase):
+    phone: str | None = None
+    email: str | None = None
+    subjects: str
+    classes: str
+
+
+class Teacher(TeacherBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    name: str
-    surname: str
-    birthday: date
-    phone: str | None = None
-    email: str | None = None
-    subjects: str
-    classes: str
-    # list["Subject"] = Relationship(
-    #     back_populates="subject", link_model=TeacherSubjectLink
-    # )
 
 
-class TeacherCreate(SQLModel):
-    name: str
-    surname: str
-    birthday: date
-    phone: str | None = None
-    email: str | None = None
-    subjects: str
-    classes: str
+class TeacherCreate(TeacherBase):
+    pass
 
 
 class ClassCreate(SQLModel):

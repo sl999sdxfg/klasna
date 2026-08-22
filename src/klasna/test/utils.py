@@ -1,3 +1,6 @@
+MISSING_ID = 999_999_999
+
+
 def student_data(**overrides):
     data = {"name": "Ivan", "surname": "Bratkovskyi", "birthday": "2012-01-11"}
     data.update(overrides)

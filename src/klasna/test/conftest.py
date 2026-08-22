@@ -6,6 +6,7 @@ from sqlmodel.pool import StaticPool
 from .. import database
 from ..database import get_session
 from ..main import app
+from .utils import parent_data, student_data, teacher_data
 
 
 class Endpoints:
@@ -45,35 +46,14 @@ def client():
 
 @pytest.fixture
 def created_student(client):
-    student_data = {"name": "Ivan", "surname": "Bratkovskyi", "birthday": "2012-01-11"}
-    post_result = client.post(Endpoints.STUDENTS, json=student_data)
-    return post_result.json()
+    return client.post(Endpoints.STUDENTS, json=student_data()).json()
 
 
 @pytest.fixture
 def created_parent(client):
-    parent_data = {
-        "name": "Stepan",
-        "surname": "Bratkovskyi",
-        "birthday": "1991-03-04",
-        "phone": "+380975840179",
-        "email": "stepanbb@gmail.com",
-    }
-    post_result = client.post(Endpoints.PARENTS, json=parent_data)
-    return post_result.json()
+    return client.post(Endpoints.PARENTS, json=parent_data()).json()
 
 
 @pytest.fixture
 def created_teacher(client):
-    teacher_data = {
-        "name": "Panas",
-        "surname": "Semerchenko",
-        "birthday": "1988-08-14",
-        "phone": "+380773147189",
-        "email": "panassem@gmail.com",
-        "subjects": "history",
-        "classes": "6,7,8",
-    }
-    post_result = client.post(Endpoints.TEACHERS, json=teacher_data)
-    print(">>>> post_resust= ", post_result)
-    return post_result.json()
+    return client.post(Endpoints.TEACHERS, json=teacher_data()).json()

@@ -1,54 +1,37 @@
 from fastapi import APIRouter, Depends
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from ..database import get_session
 from ..models import Student, StudentCreate, StudentUpdate, StudentWithParents
-from ..utils import get_or_404
+from ..utils import apply_update, create, delete, get_or_404, list_all
 
 router = APIRouter(prefix="/students", tags=["students"])
 
 
 @router.get("/{id}")
 def get_student(id: int, session: Session = Depends(get_session)) -> StudentWithParents:
-    student: Student = get_or_404(Student, id, session)
-    return student
+    return get_or_404(Student, id, session)
 
 
 @router.post("/")
 def create_student(
     student: StudentCreate, session: Session = Depends(get_session)
 ) -> Student:
-    db_student = Student.model_validate(student)
-    session.add(db_student)
-    session.commit()
-    session.refresh(db_student)
-    return db_student
+    return create(session, Student, student)
 
 
 @router.get("/")
 def get_all_students(session: Session = Depends(get_session)) -> list[Student]:
-    selection = select(Student)
-    students: list[Student] = session.exec(selection).all()
-    return students
+    return list_all(session, Student)
 
 
 @router.delete("/{id}")
 def delete_student(id: int, session: Session = Depends(get_session)) -> Student:
-    student: Student = get_or_404(Student, id, session)
-    session.delete(student)
-    session.commit()
-    return student
+    return delete(session, get_or_404(Student, id, session))
 
 
 @router.patch("/{id}")
 def update_student(
     id: int, student: StudentUpdate, session: Session = Depends(get_session)
 ) -> Student:
-    db_student: Student = get_or_404(Student, id, session)
-    update_data = student.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_student, key, value)
-    session.add(db_student)
-    session.commit()
-    session.refresh(db_student)
-    return db_student
+    return apply_update(session, get_or_404(Student, id, session), student)
