@@ -1,7 +1,7 @@
 [project]
 name = "klasna"
 version = "0.1.0"
-description = "Add your description here"
+description = "Digital school journal system"
 readme = "README.md"
 authors = [
     { name = "tanjiro", email = "viktor1svider@gmail.com" }
